@@ -1,13 +1,10 @@
 const { query } = require('../db');
 
-/**
- * Sample Model - You should replace this with models based on yout schema design
- */
-class Model {
+class Artist {
   /**
    * @returns {Promise<Array>} Array of records
    */
-  static async getData({ limit = 20, offset = 0 } = {}) {
+  static async getAll({ limit = 20, offset = 0 } = {}) {
     // Simple parameterized query example
 
     const result = await query(
@@ -19,4 +16,4 @@ class Model {
   }
 }
 
-module.exports = Model;
+module.exports = Artist;
