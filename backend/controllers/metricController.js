@@ -19,6 +19,27 @@ const getAll = async (req, res, next) => {
   }
 };
 
+const getPlaylistEfficiency = async (req, res, next) => {
+  try {
+    const { artist, country, startDate, endDate } = req.query;
+    const data = await Metric.getPlaylistEfficiency({
+      artist,
+      country: [country].flat(),
+      startDate,
+      endDate,
+    });
+
+    res.json({
+      success: true,
+      count: data.length,
+      data: data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAll,
+  getPlaylistEfficiency,
 };
