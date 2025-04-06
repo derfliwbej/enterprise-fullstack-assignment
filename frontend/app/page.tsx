@@ -1,6 +1,7 @@
 'use client';
 
 import Filter from '@/components/filter';
+import SummaryCard from '@/components/SummaryCard';
 import { useState } from 'react';
 import Typography from '../components/typography';
 
@@ -98,6 +99,25 @@ export default function Page() {
           setValue: setTimeRange,
         }}
       />
+      <div>
+        <div className="flex mt-5 mb-3 items-center">
+          <Typography.H4 className="font-bold">Summary KPIs</Typography.H4>
+          <Typography.Muted className="ml-auto text-xs">
+            Based on current filter selection
+          </Typography.Muted>
+        </div>
+
+        <div className="grid grid-cols-4 gap-5">
+          <SummaryCard metric="Selected Artist" value="BLACKPINK" />
+          <SummaryCard metric="Total Streams" value="2,600,000" />
+          <SummaryCard metric="Playlist Adds" value="250" />
+          <SummaryCard
+            metric="Highest Efficiency"
+            value="10,050"
+            footer="April 1, 2025"
+          />
+        </div>
+      </div>
     </div>
   );
 }
