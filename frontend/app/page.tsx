@@ -7,6 +7,7 @@ import SummaryCard from '@/components/SummaryCard';
 import { getDateRangeFromNow } from '@/lib/utils';
 import api, { API_URL } from '@/utils/api';
 import { useQuery } from '@tanstack/react-query';
+import moment from 'moment';
 import { useMemo, useState } from 'react';
 import Typography from '../components/typography';
 
@@ -65,7 +66,7 @@ export default function Page() {
   const [timeRange, setTimeRange] = useState(dateOptions[0].value);
   const [chartType, setChartType] = useState(chartOptions[0].value);
 
-  const { data: chartData } = useQuery({
+  const { data: metricsData } = useQuery({
     queryKey: ['metric', { artist, countries, timeRange }],
     queryFn: async () => {
       const url = new URL(API_URL);
@@ -79,10 +80,16 @@ export default function Page() {
       url.searchParams.set('endDate', endDate);
 
       const data = await api.getPlaylistEfficiency(url.search);
-      const chartData = data.data;
-      return chartData;
+      const chartData = data.data.rows;
+      const totalStreams = data.data.summary.total_streams;
+      const totalPlaylistAdds = data.data.summary.total_playlist_adds;
+      const highestEfficiency = data.data.highestEfficiency;
+      return { chartData, totalStreams, totalPlaylistAdds, highestEfficiency };
     },
   });
+
+  const { chartData, totalStreams, totalPlaylistAdds, highestEfficiency } =
+    metricsData || {};
 
   const refinedChartData = useMemo(() => {
     const chartDataMap =
@@ -143,13 +150,18 @@ export default function Page() {
         </div>
 
         <div className="grid grid-cols-4 gap-5">
-          <SummaryCard metric="Selected Artist" value="BLACKPINK" />
-          <SummaryCard metric="Total Streams" value="2,600,000" />
-          <SummaryCard metric="Playlist Adds" value="250" />
+          <SummaryCard
+            metric="Selected Artist"
+            value={artist.label || 'None'}
+          />
+          <SummaryCard metric="Total Streams" value={totalStreams || 0} />
+          <SummaryCard metric="Playlist Adds" value={totalPlaylistAdds || 0} />
           <SummaryCard
             metric="Highest Efficiency"
-            value="10,050"
-            footer="April 1, 2025"
+            value={highestEfficiency?.playlist_efficiency || 0}
+            footer={
+              moment(highestEfficiency?.date).format('MMMM Do YYYY') || ''
+            }
           />
         </div>
       </div>
