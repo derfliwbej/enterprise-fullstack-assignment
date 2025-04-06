@@ -1,52 +1,14 @@
 'use client';
 
-import Barchart from '@/components/customized/chart/bar';
-import Linechart from '@/components/customized/chart/line';
 import Radio from '@/components/customized/radio-group/radio-group-07';
 import Filter from '@/components/filter';
+import MetricChart from '@/components/MetricChart';
 import SummaryCard from '@/components/SummaryCard';
-import { useState } from 'react';
+import { getDateRangeFromNow } from '@/lib/utils';
+import api, { API_URL } from '@/utils/api';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import Typography from '../components/typography';
-
-const countryOptions = [
-  {
-    value: 'us',
-    label: 'United States',
-  },
-  {
-    value: 'uk',
-    label: 'United Kingdom',
-  },
-  {
-    value: 'ca',
-    label: 'Canada',
-  },
-  {
-    value: 'au',
-    label: 'Australia',
-  },
-  {
-    value: 'fr',
-    label: 'France',
-  },
-  {
-    value: 'de',
-    label: 'Germany',
-  },
-  {
-    value: 'jp',
-    label: 'Japan',
-  },
-  {
-    value: 'br',
-    label: 'Brazil',
-  },
-];
-
-const artistOptions = [
-  { value: 'ART001', label: 'Taylor Swift' },
-  { value: 'ART002', label: 'Drake' },
-];
 
 const metricOptions = [
   { value: 'playlistEfficiency', label: 'Playlist Efficiency' },
@@ -69,20 +31,75 @@ const chartOptions = [
 ];
 
 export default function Page() {
+  const { data: countryOptions } = useQuery({
+    queryKey: ['country'],
+    queryFn: async () => {
+      const data = await api.getCountries();
+      const countries = data.data;
+      return countries.map((e) => {
+        return { value: e.country_code, label: e.country_name };
+      });
+    },
+  });
+
+  const { data: artistOptions } = useQuery({
+    queryKey: ['artist'],
+    queryFn: async () => {
+      const data = await api.getArtists();
+      const artists = data.data;
+      return artists.map((e) => {
+        return { value: e.artist_id, label: e.artist_name };
+      });
+    },
+  });
+
+  const chartDataLabel = useMemo(() => {
+    return countryOptions?.reduce((acc, country) => {
+      return { ...acc, [country.value]: country.label };
+    }, {});
+  }, [countryOptions]);
+
   const [countries, setCountries] = useState([]);
   const [artist, setArtist] = useState({ value: '', label: '' });
-  const [metric, setMetric] = useState('');
+  const [metric, setMetric] = useState(metricOptions[0].value);
   const [timeRange, setTimeRange] = useState(dateOptions[0].value);
   const [chartType, setChartType] = useState(chartOptions[0].value);
 
-  const chartData = [
-    { date: 'April 1', desktop: 186, mobile: 80 },
-    { date: 'April 2', desktop: 305, mobile: 200 },
-    { date: 'April 3', desktop: 237, mobile: 120 },
-    { date: 'April 4', desktop: 73, mobile: 190 },
-    { date: 'April 5', desktop: 209, mobile: 130 },
-    { date: 'April 6', desktop: 214, mobile: 140 },
-  ];
+  const { data: chartData } = useQuery({
+    queryKey: ['metric', { artist, countries, timeRange }],
+    queryFn: async () => {
+      const url = new URL(API_URL);
+      url.searchParams.set('artist', artist.value);
+      for (const country of countries) {
+        url.searchParams.append('country', country.value);
+      }
+
+      const { startDate, endDate } = getDateRangeFromNow(timeRange);
+      url.searchParams.set('startDate', startDate);
+      url.searchParams.set('endDate', endDate);
+
+      const data = await api.getPlaylistEfficiency(url.search);
+      const chartData = data.data;
+      return chartData;
+    },
+  });
+
+  const refinedChartData = useMemo(() => {
+    const chartDataMap =
+      chartData?.reduce((acc, data) => {
+        return {
+          ...acc,
+          [data.date]: {
+            ...acc[data.date],
+            [data.country_code]: parseInt(data.playlist_efficiency),
+          },
+        };
+      }, {}) || {};
+
+    return Object.keys(chartDataMap).map((date) => {
+      return { date, ...chartDataMap[date] };
+    });
+  }, [chartData]);
 
   return (
     <div className="p-5">
@@ -149,19 +166,12 @@ export default function Page() {
             />
           </div>
         </div>
-        {chartType === 'line' ? (
-          <Linechart
-            chartData={chartData}
-            chartDataLabel={{ desktop: 'Desktop', mobile: 'Mobile' }}
-            xAxisKey="date"
-          />
-        ) : chartType === 'bar' ? (
-          <Barchart
-            chartData={chartData}
-            chartDataLabel={{ desktop: 'Desktop', mobile: 'Mobile' }}
-            xAxisKey="date"
-          />
-        ) : null}
+        <MetricChart
+          chartType={chartType}
+          chartData={refinedChartData}
+          chartDataLabel={chartDataLabel}
+          xAxisKey="date"
+        />
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 // API utility for making requests to the backend
 
 // Get the API URL from environment variables, with a fallback
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 /**
  * Fetch data from the API
@@ -37,10 +38,11 @@ export const fetchFromAPI = async (endpoint, options = {}) => {
  * Common API methods
  */
 export const api = {
-  /**
-   * Sample API method to get data. You should replace this with your actual API methods.
-   */
   getData: () => fetchFromAPI('api/data'),
+  getCountries: () => fetchFromAPI('api/country'),
+  getArtists: () => fetchFromAPI('api/artist'),
+  getPlaylistEfficiency: (params) =>
+    fetchFromAPI(`api/metric/playlistEfficiency${params}`),
 };
 
 export default api;

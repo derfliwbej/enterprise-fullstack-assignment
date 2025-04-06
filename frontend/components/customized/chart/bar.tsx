@@ -11,6 +11,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { useColorMap } from '@/hooks/useColorMap';
+import moment from 'moment';
 import { FC, useMemo } from 'react';
 
 const chartConfig = {
@@ -45,27 +46,39 @@ const Barchart: FC<BarchartProps> = ({
 
   const colorMap = useColorMap(chartDataKeys);
 
+  const chartConfig = useMemo(() => {
+    return chartDataKeys.reduce((acc, key) => {
+      return {
+        ...acc,
+        [key]: {
+          label: chartDataLabel[key],
+          color: colorMap[key],
+        },
+      };
+    }, {});
+  }, [chartDataKeys]);
+
   return (
     <ChartContainer config={chartConfig} className="max-h-[450px] w-full">
       <BarChart accessibilityLayer data={chartData} height={height}>
         <CartesianGrid />
-        <YAxis />
+        <YAxis domain={['dataMin', 'dataMax + 100']} />
         <XAxis
           dataKey={xAxisKey}
           tickMargin={10}
-          tickFormatter={(value) => value}
+          tickFormatter={(value) => moment(value).format('MMMM Do')}
         />
-        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelFormatter={(value) => moment(value).format('MMMM Do')}
+            />
+          }
+        />
         <ChartLegend content={<ChartLegendContent />} />
         {chartDataKeys.map((data) => {
           return (
-            <Bar
-              key={data}
-              dataKey={data}
-              radius={4}
-              fill={colorMap[data]}
-              label={chartDataLabel[data]}
-            />
+            <Bar key={data} dataKey={data} radius={4} fill={colorMap[data]} />
           );
         })}
       </BarChart>

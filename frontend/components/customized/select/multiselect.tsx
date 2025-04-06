@@ -46,13 +46,15 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   const filteredOptions = useMemo(
     () =>
-      options.filter(
-        (option) =>
-          !selected.some(
-            (selectedOption) => selectedOption.value === option.value
+      !!options?.length
+        ? options.filter(
+            (option) =>
+              !selected.some(
+                (selectedOption) => selectedOption.value === option.value
+              )
           )
-      ),
-    [selected]
+        : [],
+    [options, selected]
   );
 
   return (

@@ -41,7 +41,7 @@ const Search: FC<SearchProps> = ({ value, setValue, options, placeholder }) => {
               className="absolute mt-1 top-0 z-10 w-full rounded-md bg-popover text-popover-foreground shadow-md outline-none"
             >
               <CommandGroup className="h-full overflow-auto">
-                {options.map((option) => {
+                {options?.map((option) => {
                   return (
                     <CommandItem
                       onMouseDown={() => {
