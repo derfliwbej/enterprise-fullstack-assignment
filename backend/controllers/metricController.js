@@ -22,16 +22,44 @@ const getAll = async (req, res, next) => {
 const getPlaylistEfficiency = async (req, res, next) => {
   try {
     const { artist, country, startDate, endDate } = req.query;
-    const data = await Metric.getPlaylistEfficiency({
-      artist,
-      country: [country].flat(),
-      startDate,
-      endDate,
-    });
+    const [rows, totalStreams, totalPlaylistAdds, highestEfficiency] =
+      await Promise.all([
+        Metric.getPlaylistEfficiency({
+          artist,
+          country: country ? [country].flat() : null,
+          startDate,
+          endDate,
+        }),
+        Metric.getTotalStreams({
+          artist,
+          country: country ? [country].flat() : null,
+          startDate,
+          endDate,
+        }),
+        Metric.getTotalPlaylistAdds({
+          artist,
+          country: country ? [country].flat() : null,
+          startDate,
+          endDate,
+        }),
+        Metric.getHighestEfficiency({
+          artist,
+          country: country ? [country].flat() : null,
+          startDate,
+          endDate,
+        }),
+      ]);
+
+    const data = {
+      rows,
+      total_streams: totalStreams,
+      total_playlist_adds: totalPlaylistAdds,
+      highest_efficiency: highestEfficiency,
+    };
 
     res.json({
       success: true,
-      count: data.length,
+      count: rows.length,
       data: data,
     });
   } catch (err) {
