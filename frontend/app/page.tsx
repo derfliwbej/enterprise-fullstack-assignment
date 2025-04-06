@@ -66,7 +66,7 @@ export default function Page() {
   const [timeRange, setTimeRange] = useState(dateOptions[0].value);
   const [chartType, setChartType] = useState(chartOptions[0].value);
 
-  const { data: metricsData } = useQuery({
+  const { data: metricsData, isLoading: isFetchingMetrics } = useQuery({
     queryKey: ['metric', { artist, countries, timeRange }],
     queryFn: async () => {
       const url = new URL(API_URL);
@@ -80,12 +80,19 @@ export default function Page() {
       url.searchParams.set('endDate', endDate);
 
       const data = await api.getPlaylistEfficiency(url.search);
+
       const chartData = data.data.rows;
-      const totalStreams = data.data.summary.total_streams;
-      const totalPlaylistAdds = data.data.summary.total_playlist_adds;
-      const highestEfficiency = data.data.highestEfficiency;
-      return { chartData, totalStreams, totalPlaylistAdds, highestEfficiency };
+      const totalStreams = data.data.total_streams;
+      const totalPlaylistAdds = data.data.total_playlist_adds;
+      const highestEfficiency = data.data.highest_efficiency;
+      return {
+        chartData,
+        totalStreams,
+        totalPlaylistAdds,
+        highestEfficiency,
+      };
     },
+    refetchOnMount: false,
   });
 
   const { chartData, totalStreams, totalPlaylistAdds, highestEfficiency } =
@@ -154,14 +161,23 @@ export default function Page() {
             metric="Selected Artist"
             value={artist.label || 'None'}
           />
-          <SummaryCard metric="Total Streams" value={totalStreams || 0} />
-          <SummaryCard metric="Playlist Adds" value={totalPlaylistAdds || 0} />
+          <SummaryCard
+            metric="Total Streams"
+            value={totalStreams || 0}
+            isLoading={isFetchingMetrics}
+          />
+          <SummaryCard
+            metric="Playlist Adds"
+            value={totalPlaylistAdds || 0}
+            isLoading={isFetchingMetrics}
+          />
           <SummaryCard
             metric="Highest Efficiency"
             value={highestEfficiency?.playlist_efficiency || 0}
             footer={
               moment(highestEfficiency?.date).format('MMMM Do YYYY') || ''
             }
+            isLoading={isFetchingMetrics}
           />
         </div>
       </div>
@@ -183,6 +199,7 @@ export default function Page() {
           chartData={refinedChartData}
           chartDataLabel={chartDataLabel}
           xAxisKey="date"
+          isLoading={isFetchingMetrics}
         />
       </div>
     </div>

@@ -2,12 +2,14 @@ import { FC } from 'react';
 import Barchart from './customized/chart/bar';
 import Linechart from './customized/chart/line';
 import Typography from './typography';
+import { Skeleton } from './ui/skeleton';
 
 type MetricChartProps = {
   chartType: string;
   chartData: Array<Record<string, any>>;
   chartDataLabel: Record<string, string>;
   xAxisKey: string;
+  isLoading: boolean;
 };
 
 const MetricChart: FC<MetricChartProps> = ({
@@ -15,8 +17,11 @@ const MetricChart: FC<MetricChartProps> = ({
   chartData,
   chartDataLabel,
   xAxisKey,
+  isLoading,
 }) => {
-  if (!chartData.length) {
+  if (isLoading) {
+    return <Skeleton className="h-[450px] w-full" />;
+  } else if (!chartData.length) {
     return (
       <Typography.Muted>Select an artist to view metrics</Typography.Muted>
     );

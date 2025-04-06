@@ -62,7 +62,7 @@ const Barchart: FC<BarchartProps> = ({
     <ChartContainer config={chartConfig} className="max-h-[450px] w-full">
       <BarChart accessibilityLayer data={chartData} height={height}>
         <CartesianGrid />
-        <YAxis domain={['dataMin', 'dataMax + 100']} />
+        <YAxis domain={['dataMin - 100', 'dataMax + 100']} />
         <XAxis
           dataKey={xAxisKey}
           tickMargin={10}
