@@ -10,7 +10,7 @@ export const API_URL =
  * @param {Object} options - Fetch options
  * @returns {Promise<any>} - Promise resolving to JSON response
  */
-export const fetchFromAPI = async (endpoint, options = {}) => {
+export const fetchFromAPI = async (endpoint, options: RequestInit = {}) => {
   try {
     const url = `${API_URL}/${endpoint}`;
     console.log(`Making API request to: ${url}`);
