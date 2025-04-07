@@ -21,9 +21,9 @@ help:
 # Pull the latest images
 pull:
 	@echo "Pulling latest Docker images..."
-	@docker pull jiwonjoung/chartmetric-assignment:frontend
-	@docker pull jiwonjoung/chartmetric-assignment:backend
-	@docker pull jiwonjoung/chartmetric-assignment:database
+	@docker pull --platform linux/amd64 derfliwbej/fullstack-assignment:frontend
+	@docker pull --platform linux/amd64 derfliwbej/fullstack-assignment:backend
+	@docker pull --platform linux/arm64 jiwonjoung/chartmetric-assignment:database
 	@echo "All images pulled successfully."
 
 # Start all services
@@ -32,7 +32,7 @@ start:
 	@docker-compose up -d
 	@echo "Services started!"
 	@echo "Frontend: http://localhost:3000"
-	@echo "Backend: http://localhost:5001"
+	@echo "Backend: http://localhost:5000"
 	@echo "Database: postgresql://postgres:postgres@localhost:5432/chartmetric"
 
 # Stop all services
