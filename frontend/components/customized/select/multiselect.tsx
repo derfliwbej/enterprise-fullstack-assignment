@@ -37,11 +37,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Backspace' && selected.length > 0) {
+      if (e.key === 'Backspace' && selected.length > 0 && !inputValue) {
         setSelected((prev) => prev.slice(0, -1));
       }
     },
-    [selected]
+    [selected, inputValue]
   );
 
   const filteredOptions = useMemo(
