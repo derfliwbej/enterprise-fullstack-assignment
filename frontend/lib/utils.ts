@@ -34,3 +34,23 @@ export function getDateRangeFromNow(type: string) {
     };
   }
 }
+
+export const metricOptions = [
+  { value: 'playlistEfficiency', label: 'Playlist Efficiency' },
+];
+
+export const dateOptions = [
+  {
+    value: 'week',
+    label: '7 Days',
+  },
+  {
+    value: 'month',
+    label: '30 Days',
+  },
+];
+
+export const chartOptions = [
+  { value: 'bar', label: 'Bar' },
+  { value: 'line', label: 'Line' },
+];

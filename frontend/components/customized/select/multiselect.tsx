@@ -13,12 +13,12 @@ import {
 import { Command as CommandPrimitive } from 'cmdk';
 import { useCallback, useMemo } from 'react';
 
-export type Option = Record<'value' | 'label', string>;
+export type MultiselectOption = Record<'value' | 'label', string>;
 
 export type MultiSelectProps = {
-  options: Option[];
-  selected: Option[];
-  setSelected: React.Dispatch<React.SetStateAction<Option[]>>;
+  options: MultiselectOption[];
+  selected: MultiselectOption[];
+  setSelected: React.Dispatch<React.SetStateAction<MultiselectOption[]>>;
   placeholder: string;
 };
 
@@ -31,7 +31,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
 
-  const handleUnselect = useCallback((option: Option) => {
+  const handleUnselect = useCallback((option: MultiselectOption) => {
     setSelected((prev) => prev.filter((s) => s.value !== option.value));
   }, []);
 

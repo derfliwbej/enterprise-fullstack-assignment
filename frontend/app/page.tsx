@@ -1,105 +1,38 @@
 'use client';
 
 import Radio from '@/components/customized/radio-group/radio-group-07';
+import { MultiselectOption } from '@/components/customized/select/multiselect';
 import Filter from '@/components/filter';
 import MetricChart from '@/components/MetricChart';
 import SummaryCard from '@/components/SummaryCard';
-import {
-  Artists,
-  Countries,
-  PlaylistEfficiencyTrend,
-  Response,
-} from '@/lib/types/response';
-import { getDateRangeFromNow } from '@/lib/utils';
-import api, { API_URL } from '@/utils/api';
+import { getArtists, getCountries, getPlaylistEfficiency } from '@/lib/queries';
+import { chartOptions, dateOptions, metricOptions } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
 import Typography from '../components/typography';
 
-const metricOptions = [
-  { value: 'playlistEfficiency', label: 'Playlist Efficiency' },
-];
-
-const dateOptions = [
-  {
-    value: 'week',
-    label: '7 Days',
-  },
-  {
-    value: 'month',
-    label: '30 Days',
-  },
-];
-
-const chartOptions = [
-  { value: 'bar', label: 'Bar' },
-  { value: 'line', label: 'Line' },
-];
-
 export default function Page() {
-  const { data: countryOptions } = useQuery({
-    queryKey: ['country'],
-    queryFn: async () => {
-      const data = await api.getCountries<Response<Countries>>();
-      const countries = data.data;
-      return countries.map((e) => {
-        return { value: e.country_code, label: e.country_name };
-      });
-    },
-  });
-
-  const { data: artistOptions } = useQuery({
-    queryKey: ['artist'],
-    queryFn: async () => {
-      const data = await api.getArtists<Response<Artists>>();
-      const artists = data.data;
-      return artists.map((e) => {
-        return { value: e.artist_id, label: e.artist_name };
-      });
-    },
-  });
-
-  const chartDataLabel = useMemo<Record<string, string>>(() => {
-    return countryOptions?.reduce((acc, country) => {
-      return { ...acc, [country.value]: country.label };
-    }, {});
-  }, [countryOptions]);
-
-  const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState<Array<MultiselectOption>>([]);
   const [artist, setArtist] = useState({ value: '', label: '' });
   const [metric, setMetric] = useState(metricOptions[0].value);
   const [timeRange, setTimeRange] = useState(dateOptions[0].value);
   const [chartType, setChartType] = useState(chartOptions[0].value);
 
+  const { data: countryOptions } = useQuery({
+    queryKey: ['country'],
+    queryFn: getCountries,
+  });
+
+  const { data: artistOptions } = useQuery({
+    queryKey: ['artist'],
+    queryFn: getArtists,
+  });
+
   const { data: metricsData, isLoading: isFetchingMetrics } = useQuery({
     queryKey: ['metric', { artist, countries, timeRange }],
-    queryFn: async () => {
-      const url = new URL(API_URL);
-      url.searchParams.set('artist', artist.value);
-      for (const country of countries) {
-        url.searchParams.append('country', country.value);
-      }
-
-      const { startDate, endDate } = getDateRangeFromNow(timeRange);
-      url.searchParams.set('startDate', startDate);
-      url.searchParams.set('endDate', endDate);
-
-      const data = await api.getPlaylistEfficiency<
-        Response<PlaylistEfficiencyTrend>
-      >(url.search);
-
-      const chartData = data.data.rows;
-      const totalStreams = data.data.total_streams;
-      const totalPlaylistAdds = data.data.total_playlist_adds;
-      const highestEfficiency = data.data.highest_efficiency;
-      return {
-        chartData,
-        totalStreams,
-        totalPlaylistAdds,
-        highestEfficiency,
-      };
-    },
+    queryFn: async () =>
+      await getPlaylistEfficiency(artist, countries, timeRange),
   });
 
   const { chartData, totalStreams, totalPlaylistAdds, highestEfficiency } =
@@ -123,6 +56,12 @@ export default function Page() {
       return { date, ...chartDataMap[date] };
     });
   }, [chartData]);
+
+  const chartDataLabel = useMemo<Record<string, string>>(() => {
+    return countryOptions?.reduce((acc, country) => {
+      return { ...acc, [country.value]: country.label };
+    }, {});
+  }, [countryOptions]);
 
   return (
     <div className="p-5">
