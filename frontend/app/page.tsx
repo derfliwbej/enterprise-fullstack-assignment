@@ -4,6 +4,12 @@ import Radio from '@/components/customized/radio-group/radio-group-07';
 import Filter from '@/components/filter';
 import MetricChart from '@/components/MetricChart';
 import SummaryCard from '@/components/SummaryCard';
+import {
+  Artists,
+  Countries,
+  PlaylistEfficiencyTrend,
+  Response,
+} from '@/lib/types/response';
 import { getDateRangeFromNow } from '@/lib/utils';
 import api, { API_URL } from '@/utils/api';
 import { useQuery } from '@tanstack/react-query';
@@ -35,7 +41,7 @@ export default function Page() {
   const { data: countryOptions } = useQuery({
     queryKey: ['country'],
     queryFn: async () => {
-      const data = await api.getCountries();
+      const data = await api.getCountries<Response<Countries>>();
       const countries = data.data;
       return countries.map((e) => {
         return { value: e.country_code, label: e.country_name };
@@ -46,7 +52,7 @@ export default function Page() {
   const { data: artistOptions } = useQuery({
     queryKey: ['artist'],
     queryFn: async () => {
-      const data = await api.getArtists();
+      const data = await api.getArtists<Response<Artists>>();
       const artists = data.data;
       return artists.map((e) => {
         return { value: e.artist_id, label: e.artist_name };
@@ -54,7 +60,7 @@ export default function Page() {
     },
   });
 
-  const chartDataLabel = useMemo(() => {
+  const chartDataLabel = useMemo<Record<string, string>>(() => {
     return countryOptions?.reduce((acc, country) => {
       return { ...acc, [country.value]: country.label };
     }, {});
@@ -79,7 +85,9 @@ export default function Page() {
       url.searchParams.set('startDate', startDate);
       url.searchParams.set('endDate', endDate);
 
-      const data = await api.getPlaylistEfficiency(url.search);
+      const data = await api.getPlaylistEfficiency<
+        Response<PlaylistEfficiencyTrend>
+      >(url.search);
 
       const chartData = data.data.rows;
       const totalStreams = data.data.total_streams;
@@ -92,23 +100,24 @@ export default function Page() {
         highestEfficiency,
       };
     },
-    refetchOnMount: false,
   });
 
   const { chartData, totalStreams, totalPlaylistAdds, highestEfficiency } =
     metricsData || {};
 
   const refinedChartData = useMemo(() => {
-    const chartDataMap =
-      chartData?.reduce((acc, data) => {
-        return {
-          ...acc,
-          [data.date]: {
-            ...acc[data.date],
-            [data.country_code]: parseInt(data.playlist_efficiency),
-          },
-        };
-      }, {}) || {};
+    const chartDataMap: Record<
+      string,
+      Record<string, number>
+    > = chartData?.reduce((acc, data) => {
+      return {
+        ...acc,
+        [data.date]: {
+          ...acc[data.date],
+          [data.country_code]: parseInt(data.playlist_efficiency),
+        },
+      };
+    }, {}) || {};
 
     return Object.keys(chartDataMap).map((date) => {
       return { date, ...chartDataMap[date] };
