@@ -3,7 +3,6 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -13,17 +12,6 @@ import {
 import { useColorMap } from '@/hooks/useColorMap';
 import moment from 'moment';
 import { FC, useMemo } from 'react';
-
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: '#2563eb',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: '#60a5fa',
-  },
-} satisfies ChartConfig;
 
 type BarchartProps = {
   chartData: Array<Record<string, any>>;

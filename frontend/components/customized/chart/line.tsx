@@ -3,7 +3,6 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -12,18 +11,7 @@ import {
 } from '@/components/ui/chart';
 import { useColorMap } from '@/hooks/useColorMap';
 import moment from 'moment';
-import { FC, useEffect, useMemo } from 'react';
-
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: '#2563eb',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: '#60a5fa',
-  },
-} satisfies ChartConfig;
+import { FC, useMemo } from 'react';
 
 type LinechartProps = {
   chartData: Array<Record<string, any>>;
@@ -57,10 +45,6 @@ const Linechart: FC<LinechartProps> = ({
       };
     }, {});
   }, [chartDataKeys]);
-
-  useEffect(() => {
-    console.log('[test] chartData', chartData);
-  }, [chartData]);
 
   return (
     <ChartContainer config={chartConfig} className="max-h-[450px] w-full">
