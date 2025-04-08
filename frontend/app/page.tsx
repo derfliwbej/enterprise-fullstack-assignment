@@ -29,7 +29,11 @@ export default function Page() {
     queryFn: getArtists,
   });
 
-  const { data: metricsData, isLoading: isFetchingMetrics } = useQuery({
+  const {
+    data: metricsData,
+    isLoading: isFetchingMetrics,
+    isError: isErrorFetchingMetrics,
+  } = useQuery({
     queryKey: ['metric', { artist, countries, timeRange }],
     queryFn: async () =>
       await getPlaylistEfficiency(artist, countries, timeRange),
@@ -148,6 +152,7 @@ export default function Page() {
           chartDataLabel={chartDataLabel}
           xAxisKey="date"
           isLoading={isFetchingMetrics}
+          isError={isErrorFetchingMetrics}
         />
       </div>
     </div>

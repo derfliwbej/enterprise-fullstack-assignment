@@ -10,6 +10,7 @@ type MetricChartProps = {
   chartDataLabel: Record<string, string>;
   xAxisKey: string;
   isLoading: boolean;
+  isError: boolean;
 };
 
 const MetricChart: FC<MetricChartProps> = ({
@@ -18,9 +19,16 @@ const MetricChart: FC<MetricChartProps> = ({
   chartDataLabel,
   xAxisKey,
   isLoading,
+  isError,
 }) => {
   if (isLoading) {
     return <Skeleton className="h-[450px] w-full" />;
+  } else if (isError) {
+    return (
+      <Typography.Muted>
+        Error while fetching server data. Please try again later.
+      </Typography.Muted>
+    );
   } else if (!chartData.length) {
     return (
       <Typography.Muted>Select an artist to view metrics</Typography.Muted>
